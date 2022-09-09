@@ -8,6 +8,7 @@ namespace WebApplication3.Mapper
     {
         public Mapping()
         {
+            CreateMap<CsvView, CsvViewVM>().ReverseMap();
             CreateMap<Category, CategoryVM>().ReverseMap();
             CreateMap<Subcategory, SubCategoryVM>().ReverseMap();
             CreateMap<Item, ItemVM>().

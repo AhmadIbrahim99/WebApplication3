@@ -8,6 +8,7 @@ namespace WebApplication3.Model
 {
     public partial class FirstExamContext : DbContext
     {
+        public bool IgnoreFilter { get; set; }
         public FirstExamContext()
         {
         }
@@ -20,6 +21,7 @@ namespace WebApplication3.Model
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Item> Items { get; set; }
         public virtual DbSet<Subcategory> Subcategories { get; set; }
+        public virtual DbSet<CsvView> CsvViews { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -89,7 +91,7 @@ namespace WebApplication3.Model
 
                 entity.Property(e => e.DeletedAt).HasColumnType("date");
 
-                entity.Property(e => e.Name)
+                entity.Property(e => e.Name)    
                     .IsRequired()
                     .HasMaxLength(255)
                     .IsUnicode(false)
@@ -101,7 +103,24 @@ namespace WebApplication3.Model
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__subcatego__categ__3D5E1FD2");
             });
-
+            modelBuilder.Entity<CsvView>(
+                entity =>
+                {
+                    entity.ToView("cvsview");
+                    entity.Property(e => e.ItemId).HasColumnName("ItemId");
+                    entity.Property(e => e.SubcategoryId).HasColumnName("SubcategoryId");
+                    entity.Property(e => e.CategoryId).HasColumnName("CategoryId");
+                    entity.Property(e => e.ItemName).HasColumnName("ItemName");
+                    entity.Property(e => e.SubName).HasColumnName("SubName");
+                    entity.Property(e => e.CategoryName).HasColumnName("CategoryName");
+                    entity.Property(e => e.Archived).HasColumnName("Archived");
+                    entity.HasNoKey();
+                }
+                );
+            modelBuilder.Entity<Item>().HasQueryFilter(x => !x.Archived || IgnoreFilter);
+            modelBuilder.Entity<Subcategory>().HasQueryFilter(x => !x.Archived || IgnoreFilter);
+            modelBuilder.Entity<Category>().HasQueryFilter( x=> !x.Archived || IgnoreFilter);
+            modelBuilder.Entity<CsvView>().HasQueryFilter( x=> !x.Archived || IgnoreFilter);
             OnModelCreatingPartial(modelBuilder);
         }
 

@@ -24,31 +24,27 @@ namespace WebApplication3.Controllers
             _context = context;
             _mapper = mapper;
         }
-
+        
         [HttpGet]
         [Route("Items")]
-        public IActionResult GetData()
-        {
-            var data = _context.Categories.
-                SelectMany(x => x.Subcategories).
-                SelectMany(c => c.Items).Include(x => x.Subcategory).ThenInclude(x=> x.Category);
-            var result = _mapper.Map<List<ItemVM>>(data);
-            return Ok(result);
-        }
+        public IActionResult GetData() => Ok(_mapper.Map<List<CsvViewVM>>(_context.CsvViews.ToList()));
+        
 
         [HttpGet]
         [Route("Convert")]
         public IActionResult ConvetData()
         {
+            //var data = _context.Categories.
+            //     SelectMany(x => x.Subcategories).
+            //     SelectMany(c => c.Items).Include(x => x.Subcategory).ThenInclude(x => x.Category);
+            //var result = _mapper.Map<List<ItemVM>>(data);
+            var data = _context.CsvViews.ToList();
+            var result = _mapper.Map<List<CsvViewVM>>(data);
             var csvpath = Path.Combine(Environment.CurrentDirectory, $"Items-{DateTime.Now.ToFileTime()}.csv");
             using(var streamWriter = new StreamWriter(csvpath))
             {
                 using(var csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture))
                 {
-                    var data = _context.Categories.
-                 SelectMany(x => x.Subcategories).
-                 SelectMany(c => c.Items).Include(x => x.Subcategory).ThenInclude(x => x.Category);
-                    var result = _mapper.Map<List<ItemVM>>(data);
                     csvWriter.WriteRecords(result);
                 }
             }
